@@ -1,0 +1,22 @@
+{
+  "name": "img2avif",
+  "version": "1.0.0",
+  "description": "a cli tool to convert png/jpeg to avif format",
+  "main": "index.js",
+  "type": "module",
+  "bin": {
+    "rz-cp": "src/index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "avif"
+  ],
+  "author": "fucai.xie",
+  "license": "ISC",
+  "dependencies": {
+    "imagemin": "^9.0.0",
+    "imagemin-avif": "^0.1.6"
+  }
+}
