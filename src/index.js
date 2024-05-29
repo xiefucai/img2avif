@@ -8,7 +8,7 @@ import path from 'path';
 const GREEN = '\x1b[32m%s\x1b[0m';
 const RED = '\x1b[31m%s\x1b[0m';
 
-const parseCmdParams = (line) => {
+const parseCmdParams = (line, map = {}) => {
     const placeholder = `PLACEHOLDER`;
     const arr = [];
     const data = {};
@@ -18,7 +18,10 @@ const parseCmdParams = (line) => {
             const len = arr.push(s);
             return `${placeholder}_${len - 1}`;
         })
-        .replace(/--([\w-:.]+)=?(\S*)/g, (_, key, value) => {
+        .replace(/-{1,2}([\w-:.]+)=?(\S*)/g, (_, key, value) => {
+            if (map[key]) {
+                key = map[key];
+            }
             if (new RegExp(`^${placeholder}_\\d+$`).test(value)) {
                 const index = parseInt(value.replace(`${placeholder}_`, ''), 10);
                 data[key] = arr[index];
@@ -28,6 +31,12 @@ const parseCmdParams = (line) => {
                     d[k] = decodeURIComponent(v);
                 });
                 data[key] = d;
+            } else if (value === '' || value === 'true') {
+                data[key] = true;
+            } else if (value === 'false') {
+                data[key] = false;
+            } else if (!isNaN(value)) {
+                data[key] = Number(value);
             } else {
                 data[key] = value || '';
             }
@@ -74,10 +83,18 @@ Arguments:
 
 exp: img2avif --quality=75 --in=../test.png --out=hello.avif
   `);
+};
+const showVersion = async () => {
+    const text = fs.readFileSync(path.join(import.meta.dirname, '../package.json'), {encoding:"utf-8"});
+    const data = JSON.parse(text);
+    console.log(GREEN, data.version);
 }
 
-const cmdArgs = parseCmdParams(process.argv.slice(2).join(' '));
-if (cmdArgs.h || !cmdArgs.in) {
+const cmdArgs = parseCmdParams(process.argv.slice(2).join(' '), { v: 'version', h: 'help' });
+
+if (cmdArgs.version) {
+    showVersion();
+} else if (cmdArgs.help || !cmdArgs.in) {
     showHelp();
 } else {
     // console.log(process.cwd(), cmdArgs);
